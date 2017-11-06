@@ -15,7 +15,7 @@ class Pin
 public:
     Pin(uint8_t pinNumber, uint8_t direction);
     Pin(uint8_t pinNumber, uint8_t direction, uint8_t pull);
-    ~Pin();
+    ~Pin() {}
     uint8_t get();
     void set(uint8_t);
     void changeDirection(uint8_t);
