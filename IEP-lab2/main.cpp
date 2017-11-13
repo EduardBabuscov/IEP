@@ -19,35 +19,36 @@
 
 #include "pin.hpp"
 #include "pwm.hpp"
+#include "spi.hpp"
 
 #include <stdio.h>
 // Blinks on RPi Plug P1 pin 11 (which is GPIO pin 17)
 #define PIN RPI_GPIO_P1_11
+
+
 int main(int argc, char **argv)
 {
-    Pin myPin(0, INPUT, PULL_UP);
-    Pwm myPwm(100, 50);
-    // If you call this, it will not actually access the GPIO
-    // Use for testing
     bcm2835_set_debug(1);
     if (!bcm2835_init())
-      return 1;
-    // Set the pin to be an output
-    bcm2835_gpio_fsel(PIN, BCM2835_GPIO_FSEL_OUTP);
-    // Blink
-    while (1)
     {
-        // Consideram butonul apasat la 0 logic
-        if (myPin.get() == 0) {
-            if (myPwm.getFillFactor() == 100) {
-                myPwm.setFillFactor(0);
-            }
-            else {
-                myPwm.setFillFactor(myPwm.getFillFactor() + 10);
-            }
-        }
+      printf("bcm2835_init failed. Are you running as root??\n");
+      return 1;
     }
-    bcm2835_close();
+    if (!bcm2835_spi_begin())
+    {
+      printf("bcm2835_spi_begin failed. Are you running as root??\n");
+      return 1;
+    }
+
+    Spi spi(BCM2835_SPI_MODE0
+        , BCM2835_SPI_CLOCK_DIVIDER_65536
+        , BCM2835_SPI_CS0
+        , LOW);
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+    uint8_t send_data = 0x23;
+    uint8_t read_data = spi.transfer(send_data);
+    if (send_data != read_data) {
+        printf("Do you have the loopback from MOSI to MISO connected?\n");
+    }
     return 0;
 }
-

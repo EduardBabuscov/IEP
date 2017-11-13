@@ -57,13 +57,3 @@ void Pin::changeDirection(uint8_t newDir)
         bcm2835_gpio_fsel(pinNumber, newDir);
     }
 }
-
-Pin::~Pin()
-{
-    uint8_t * pointer = & pinNumber;
-    delete pointer;
-    pointer = &direction;
-    delete pointer;
-    pointer = &pull;
-    delete pointer;
-}
